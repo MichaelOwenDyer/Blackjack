@@ -18,24 +18,24 @@ impl App {
             should_quit: false,
         }
     }
-    
+
     #[must_use]
     pub fn current_game(&self) -> Option<&Blackjack> {
         self.games.get(self.selected_game)
     }
-    
+
     pub fn simulate(&mut self) {
         for game in &mut self.games {
             game.simulate();
         }
     }
-    
+
     pub fn tick(&mut self) {
         for game in &mut self.games {
             game.tick();
         }
     }
-    
+
     pub fn input(&mut self, key: KeyCode) {
         match key {
             KeyCode::Esc => self.should_quit = true,
@@ -46,12 +46,12 @@ impl App {
             key => self.input_current_game(key),
         }
     }
-    
+
     pub fn add_game(&mut self) {
         self.games.push(Blackjack::new());
         self.selected_game = self.games.len() - 1;
     }
-    
+
     pub fn delete_game(&mut self) {
         if !self.games.is_empty() {
             self.games.remove(self.selected_game);
@@ -60,15 +60,15 @@ impl App {
             }
         }
     }
-    
+
     pub fn cursor_up(&mut self) {
         self.selected_game = (self.selected_game + self.games.len() - 1) % self.games.len();
     }
-    
+
     pub fn cursor_down(&mut self) {
         self.selected_game = (self.selected_game + 1) % self.games.len();
     }
-    
+
     pub fn input_current_game(&mut self, key: KeyCode) {
         if let Some(game) = self.games.get_mut(self.selected_game) {
             game.input(key);

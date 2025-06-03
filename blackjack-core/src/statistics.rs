@@ -1,6 +1,6 @@
+use crate::card::hand::{DealerHand, PlayerHand, Status};
 use std::cmp::Ordering;
 use std::fmt::Display;
-use crate::card::hand::{DealerHand, PlayerHand, Status};
 
 #[derive(Debug, Default)]
 pub struct Statistics {
@@ -43,7 +43,7 @@ impl Statistics {
             match hand.status {
                 Status::Blackjack => self.blackjacks += 1,
                 Status::Bust => self.busts += 1,
-                _ => {},
+                _ => {}
             }
             match hand.winnings.cmp(&hand.bet) {
                 Ordering::Greater => self.wins += 1,
@@ -56,7 +56,7 @@ impl Statistics {
         match dealer_hand.status {
             Status::Blackjack => self.dealer_blackjacks += 1,
             Status::Bust => self.dealer_busts += 1,
-            _ => {},
+            _ => {}
         }
     }
 }
@@ -81,17 +81,61 @@ impl Display for Statistics {
         writeln!(f, "Turns Played: {}", self.turns_played)?;
         writeln!(f, "Hands Played: {}", self.hands_played)?;
         writeln!(f, "Total Bet: {} Chips", self.total_bet)?;
-        writeln!(f, "Average Bet: {} Chips", div(self.total_bet, self.hands_played))?;
+        writeln!(
+            f,
+            "Average Bet: {} Chips",
+            div(self.total_bet, self.hands_played)
+        )?;
         writeln!(f, "Total Won: {} Chips", self.total_won)?;
-        writeln!(f, "Average Win: {} Chips", div(self.total_won, self.hands_played))?;
-        writeln!(f, "Wins: {} ({}%)", self.wins, pct(self.wins, self.hands_played))?;
-        writeln!(f, "Pushes: {} ({}%)", self.pushes, pct(self.pushes, self.hands_played))?;
-        writeln!(f, "Losses: {} ({}%)", self.losses, pct(self.losses, self.hands_played))?;
-        writeln!(f, "Blackjacks: {} ({}%)", self.blackjacks, pct(self.blackjacks, self.hands_played))?;
-        writeln!(f, "Busts: {} ({}%)", self.busts, pct(self.busts, self.hands_played))?;
-        writeln!(f, "Dealer Blackjacks: {} ({}%)", self.dealer_blackjacks, pct(self.dealer_blackjacks, self.hands_played))?;
-        writeln!(f, "Dealer Busts: {} ({}%)", self.dealer_busts, pct(self.dealer_busts, self.hands_played))?;
+        writeln!(
+            f,
+            "Average Win: {} Chips",
+            div(self.total_won, self.hands_played)
+        )?;
+        writeln!(
+            f,
+            "Wins: {} ({}%)",
+            self.wins,
+            pct(self.wins, self.hands_played)
+        )?;
+        writeln!(
+            f,
+            "Pushes: {} ({}%)",
+            self.pushes,
+            pct(self.pushes, self.hands_played)
+        )?;
+        writeln!(
+            f,
+            "Losses: {} ({}%)",
+            self.losses,
+            pct(self.losses, self.hands_played)
+        )?;
+        writeln!(
+            f,
+            "Blackjacks: {} ({}%)",
+            self.blackjacks,
+            pct(self.blackjacks, self.hands_played)
+        )?;
+        writeln!(
+            f,
+            "Busts: {} ({}%)",
+            self.busts,
+            pct(self.busts, self.hands_played)
+        )?;
+        writeln!(
+            f,
+            "Dealer Blackjacks: {} ({}%)",
+            self.dealer_blackjacks,
+            pct(self.dealer_blackjacks, self.hands_played)
+        )?;
+        writeln!(
+            f,
+            "Dealer Busts: {} ({}%)",
+            self.dealer_busts,
+            pct(self.dealer_busts, self.hands_played)
+        )?;
 
         Ok(())
     }
 }
+

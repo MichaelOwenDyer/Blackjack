@@ -11,7 +11,7 @@ pub enum DealerSoft17Action {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BlackjackPayout {
     ThreeToTwo,
-    SixToFive
+    SixToFive,
 }
 
 /// Blackjack table rules.
@@ -55,3 +55,4 @@ impl Default for Rules {
         }
     }
 }
+

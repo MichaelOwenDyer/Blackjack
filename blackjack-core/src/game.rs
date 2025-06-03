@@ -36,7 +36,7 @@ pub struct Table {
     pub shoe: Shoe,             // The shoe of cards used in the game
     pub rules: Rules,           // The table rules
     pub statistics: Statistics, // The continuous game statistics
-    pub fast_forward: bool,     // Fast-forward non-user-facing transitions and skip input checks for faster simulation
+    pub fast_forward: bool, // Fast-forward non-user-facing transitions and skip input checks for faster simulation
 }
 
 #[derive(Debug, PartialEq, Eq)]

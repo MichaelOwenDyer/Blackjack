@@ -4,7 +4,10 @@ use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Suit {
-    Clubs, Diamonds, Hearts, Spades
+    Clubs,
+    Diamonds,
+    Hearts,
+    Spades,
 }
 
 impl fmt::Display for Suit {
@@ -21,7 +24,19 @@ impl fmt::Display for Suit {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Rank {
-    Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King,
+    Ace,
 }
 
 impl fmt::Display for Rank {
@@ -362,7 +377,7 @@ pub mod hand {
                 (Status::Blackjack, Status::Blackjack) => self.payout_push(), // Blackjack push
                 (Status::Blackjack, _) => self.payout_blackjack(blackjack_payout), // Blackjack win
                 (_, Status::Blackjack) | (Status::Bust, _) => self.payout_loss(), // Dealer blackjack or player bust
-                (_, Status::Bust) => self.payout_win(), // Dealer bust
+                (_, Status::Bust) => self.payout_win(),                           // Dealer bust
                 _ => match self.value.total.cmp(&dealer_hand.value.total) {
                     Ordering::Greater => self.payout_win(), // Player win
                     Ordering::Equal => self.payout_push(),  // Push
@@ -451,9 +466,12 @@ pub mod hand {
         /// play all hands to completion in the order they were split.
         /// If there are no more hands to play, Self is deconstructed and Err(hands) is returned.
         pub fn continue_playing(mut self) -> Result<Self, Vec<PlayerHand>> {
-            if let Some(position) = self.hands.iter()
+            if let Some(position) = self
+                .hands
+                .iter()
                 .skip(self.current_hand_index)
-                .position(|hand| hand.status == Status::InPlay) {
+                .position(|hand| hand.status == Status::InPlay)
+            {
                 self.current_hand_index += position;
                 Ok(self)
             } else {
@@ -464,16 +482,16 @@ pub mod hand {
 
     /// Tests whether a hand is composed of cards with the given values.
     /// The multiset of card values in the hand must be equal to the multiset of values provided.
-    /// 
+    ///
     /// # Example
     /// ```
     /// use blackjack_core::card::{Card, Rank, Suit};
     /// use blackjack_core::card::hand::PlayerHand;
     /// use blackjack_core::composed;
-    /// 
+    ///
     /// let mut hand = PlayerHand::new(Card { rank: Rank::Ten, suit: Suit::Clubs }, 100);
     /// hand += Card { rank: Rank::Five, suit: Suit::Diamonds };
-    /// 
+    ///
     /// assert!(composed!(hand => 10, 5));
     /// assert!(composed!(hand => 5, 10));
     /// assert!(!composed!(hand => 5));
@@ -501,8 +519,8 @@ pub mod hand {
 }
 
 pub mod shoe {
-    use rand::thread_rng;
-    use rand_distr::{Distribution, WeightedTreeIndex};
+    use rand::rng;
+    use rand_distr::{weighted::WeightedTreeIndex, Distribution};
 
     use crate::card::Card;
 
@@ -539,7 +557,7 @@ pub mod shoe {
         /// The card is removed from the shoe, and the distribution is updated to reflect the new weight.
         /// If the last card is drawn, the shoe is shuffled.
         pub fn draw_card(&mut self) -> Card {
-            let ordinal = self.dist.sample(&mut thread_rng());
+            let ordinal = self.dist.sample(&mut rng());
             self.cards_drawn += 1;
             let new_weight = self.dist.get(ordinal) - 1;
             // Update the distribution to reflect the new weight of the removed card

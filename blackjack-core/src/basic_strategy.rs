@@ -4,9 +4,9 @@
 //! This simulates a player who knows the optimal move for every possible hand.
 //! This makes a best-effort attempt to consider the rules of the game, but is not perfect.
 
-use crate::game::{HandAction, Table};
 use crate::card::hand::{DealerHand, PlayerHand, PlayerTurn};
 use crate::composed;
+use crate::game::{HandAction, Table};
 
 #[must_use]
 pub const fn bet() -> u32 {
@@ -20,12 +20,18 @@ pub fn surrender_late(table: &Table, player_hand: &PlayerHand, dealer_hand: &Dea
         (14, 11) => table.shoe.decks == 1 && player_hand.is_pair() && dealer_hand.hits_on_soft_17(),
         (15, 10) if table.shoe.decks < 8 => composed!(player_hand => 9, 6; 10, 5),
         (15, 10) if table.shoe.decks >= 8 => true,
-        (15, 11) if table.shoe.decks < 4 => dealer_hand.hits_on_soft_17() && composed!(player_hand => 9, 6; 10, 5),
+        (15, 11) if table.shoe.decks < 4 => {
+            dealer_hand.hits_on_soft_17() && composed!(player_hand => 9, 6; 10, 5)
+        }
         (15, 11) if table.shoe.decks >= 4 => true,
         (16, 9) => table.shoe.decks >= 4,
         (16, 10) => true,
-        (16, 11) if table.shoe.decks == 1 && !dealer_hand.hits_on_soft_17() => composed!(player_hand => 10, 6),
-        (16, 11) if table.shoe.decks <= 2 && dealer_hand.hits_on_soft_17() => composed!(player_hand => 9, 7; 10, 6),
+        (16, 11) if table.shoe.decks == 1 && !dealer_hand.hits_on_soft_17() => {
+            composed!(player_hand => 10, 6)
+        }
+        (16, 11) if table.shoe.decks <= 2 && dealer_hand.hits_on_soft_17() => {
+            composed!(player_hand => 9, 7; 10, 6)
+        }
         (16, 11) if table.shoe.decks == 2 && !dealer_hand.hits_on_soft_17() => true,
         (16, 11) if table.shoe.decks > 2 => true,
         (15 | 17, 11) => dealer_hand.hits_on_soft_17(),
@@ -83,7 +89,10 @@ enum PreferredAction {
 /// Assuming 4-8 decks
 #[must_use]
 pub fn play_hand(table: &Table, player_hands: &PlayerTurn, dealer_hand: &DealerHand) -> HandAction {
-    let preferred = match (player_hands.current_hand().value.soft, table.check_split_allowed(player_hands).is_ok()) {
+    let preferred = match (
+        player_hands.current_hand().value.soft,
+        table.check_split_allowed(player_hands).is_ok(),
+    ) {
         (false, false) => make_move_hard(table, &player_hands.current_hand(), dealer_hand),
         (true, false) => make_move_soft(&player_hands.current_hand(), dealer_hand),
         (_, true) => make_move_splittable(&player_hands.current_hand(), dealer_hand),
@@ -107,21 +116,30 @@ pub fn play_hand(table: &Table, player_hands: &PlayerTurn, dealer_hand: &DealerH
             }
         }
         PreferredAction::SurrenderOrHit => {
-            if table.check_surrender_allowed(&player_hands.current_hand()).is_ok() {
+            if table
+                .check_surrender_allowed(&player_hands.current_hand())
+                .is_ok()
+            {
                 HandAction::Surrender
             } else {
                 HandAction::Hit
             }
         }
         PreferredAction::SurrenderOrStand => {
-            if table.check_surrender_allowed(&player_hands.current_hand()).is_ok() {
+            if table
+                .check_surrender_allowed(&player_hands.current_hand())
+                .is_ok()
+            {
                 HandAction::Surrender
             } else {
                 HandAction::Stand
             }
         }
         PreferredAction::SurrenderOrSplit => {
-            if table.check_surrender_allowed(&player_hands.current_hand()).is_ok() {
+            if table
+                .check_surrender_allowed(&player_hands.current_hand())
+                .is_ok()
+            {
                 HandAction::Surrender
             } else {
                 HandAction::Split
@@ -144,24 +162,48 @@ fn make_move_hard(
 ) -> PreferredAction {
     match (player_hand.value.total, dealer_hand.showing()) {
         (4..=8, 2..=11) => PreferredAction::Hit,
-        (9, 2) => if table.shoe.decks <= 2 { PreferredAction::DoubleOrHit } else { PreferredAction::Hit },
+        (9, 2) => {
+            if table.shoe.decks <= 2 {
+                PreferredAction::DoubleOrHit
+            } else {
+                PreferredAction::Hit
+            }
+        }
         (9, 3..=6) => PreferredAction::DoubleOrHit,
         (9, 7..=11) => PreferredAction::Hit,
         (10, 2..=9) => PreferredAction::DoubleOrHit,
         (10, 10 | 11) => PreferredAction::Hit,
         (11, 2..=10) => PreferredAction::DoubleOrHit,
-        (11, 11) => if table.shoe.decks <= 2 || dealer_hand.hits_on_soft_17() { PreferredAction::DoubleOrHit } else { PreferredAction::Hit },
+        (11, 11) => {
+            if table.shoe.decks <= 2 || dealer_hand.hits_on_soft_17() {
+                PreferredAction::DoubleOrHit
+            } else {
+                PreferredAction::Hit
+            }
+        }
         (12, 2..=3) => PreferredAction::Hit,
         (12, 4..=6) => PreferredAction::Stand,
         (12..=14, 7..=11) => PreferredAction::Hit,
         (13..=16, 2..=6) => PreferredAction::Stand,
         (15, 7..=9) => PreferredAction::Hit,
         (15, 10) => PreferredAction::SurrenderOrHit,
-        (15, 11) => if dealer_hand.hits_on_soft_17() { PreferredAction::SurrenderOrHit } else { PreferredAction::Hit },
+        (15, 11) => {
+            if dealer_hand.hits_on_soft_17() {
+                PreferredAction::SurrenderOrHit
+            } else {
+                PreferredAction::Hit
+            }
+        }
         (16, 7 | 8) => PreferredAction::Hit,
         (16, 9..=11) => PreferredAction::SurrenderOrHit,
         (17, 2..=10) => PreferredAction::Stand,
-        (17, 11) => if dealer_hand.hits_on_soft_17() { PreferredAction::SurrenderOrStand } else { PreferredAction::Stand },
+        (17, 11) => {
+            if dealer_hand.hits_on_soft_17() {
+                PreferredAction::SurrenderOrStand
+            } else {
+                PreferredAction::Stand
+            }
+        }
         (18..=21, 2..=11) => PreferredAction::Stand,
         (_, showing) => panic!(
             "Invalid hand value: {} against {}",
@@ -179,12 +221,24 @@ fn make_move_soft(player_hand: &PlayerHand, dealer_hand: &DealerHand) -> Preferr
         (17, 2) => PreferredAction::Hit,
         (17, 3..=6) => PreferredAction::DoubleOrHit,
         (13..=17, 7..=11) => PreferredAction::Hit,
-        (18, 2) => if dealer_hand.hits_on_soft_17() { PreferredAction::DoubleOrStand } else { PreferredAction::Stand },
+        (18, 2) => {
+            if dealer_hand.hits_on_soft_17() {
+                PreferredAction::DoubleOrStand
+            } else {
+                PreferredAction::Stand
+            }
+        }
         (18, 3..=6) => PreferredAction::DoubleOrStand,
         (18, 7 | 8) => PreferredAction::Stand,
         (18, 9..=11) => PreferredAction::Hit,
         (19, 2..=5) => PreferredAction::Stand,
-        (19, 6) => if dealer_hand.hits_on_soft_17() { PreferredAction::DoubleOrStand } else { PreferredAction::Stand },
+        (19, 6) => {
+            if dealer_hand.hits_on_soft_17() {
+                PreferredAction::DoubleOrStand
+            } else {
+                PreferredAction::Stand
+            }
+        }
         (19, 7..=11) => PreferredAction::Stand,
         (20 | 21, 2..=11) => PreferredAction::Stand,
         (_, showing) => panic!(
@@ -194,10 +248,7 @@ fn make_move_soft(player_hand: &PlayerHand, dealer_hand: &DealerHand) -> Preferr
     }
 }
 
-fn make_move_splittable(
-    player_hand: &PlayerHand,
-    dealer_hand: &DealerHand
-) -> PreferredAction {
+fn make_move_splittable(player_hand: &PlayerHand, dealer_hand: &DealerHand) -> PreferredAction {
     match (player_hand.value.total / 2, dealer_hand.showing()) {
         (2 | 3, 2 | 3) => PreferredAction::SplitIfDoubleAfterSplitAllowedElseHit,
         (2 | 3, 4..=7) => PreferredAction::Split,
@@ -213,7 +264,13 @@ fn make_move_splittable(
         (7, 2..=7) => PreferredAction::Split,
         (7, 8..=11) => PreferredAction::Hit,
         (8, 2..=10) => PreferredAction::Split,
-        (8, 11) => if dealer_hand.hits_on_soft_17() { PreferredAction::SurrenderOrSplit } else { PreferredAction::Split }
+        (8, 11) => {
+            if dealer_hand.hits_on_soft_17() {
+                PreferredAction::SurrenderOrSplit
+            } else {
+                PreferredAction::Split
+            }
+        }
         (9, 2..=6) => PreferredAction::Split,
         (9, 7) => PreferredAction::Stand,
         (9, 8 | 9) => PreferredAction::Split,
